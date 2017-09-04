@@ -3,13 +3,13 @@
 #
 
 import argparse
-import json
 import os
 import sys
 
 from docx import Document
 
-from validocx.extractor import extract
+from validocx import utils
+from validocx.validator import validate
 
 
 def _get_file_path(file_path):
@@ -25,13 +25,13 @@ def create_parser():
         '-f', '--file',
         required=True,
         type=_get_file_path,
-        help='docx format file to be validated.'
+        help='Docx file to be validated.'
     )
     parser.add_argument(
-        '-s', '--style',
-        required=True,
-        nargs='+',
-        help='Styles to be fetched and analyzed.'
+        '-r', '--requirements',
+        required='True',
+        type=_get_file_path,
+        help='File with the requirements. In YAML or JSON format.'
     )
     return parser
 
@@ -42,14 +42,15 @@ def parse_args(args):
     return parsed_args
 
 
-def main(args=sys.argv[1:]):
-    sys.exit(run(arguments=parse_args(args=args)))
-
-
 def run(arguments, stdout=sys.stdout):
     document = Document(docx=arguments['file'])
-    data = extract(document, styles=arguments['style'])
-    stdout.write(json.dumps(data, indent=2, ensure_ascii=False))
+    schema = utils.read_from_file(arguments['requirements'])
+    validate(document, schema)
+    stdout.write("Validation process completed successfully.\n")
+
+
+def main(args=sys.argv[1:]):
+    sys.exit(run(arguments=parse_args(args=args)))
 
 
 if __name__ == '__main__':

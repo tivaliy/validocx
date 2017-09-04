@@ -3,8 +3,8 @@
 #
 
 
-class DOCXDocument(object):
-    """Class for retrieving docx document attributes."""
+class DocumentWrapper(object):
+    """Wrapper class for retrieving docx document attributes."""
 
     def __init__(self, document):
         self._document = document
@@ -29,19 +29,18 @@ class DOCXDocument(object):
     def last_modified_by(self):
         return self._last_modified_by
 
-    def iter_paragraphs(self, styles=None):
+    def iter_paragraphs(self, style=None):
         """Iterate over paragraphs of document.
 
-        :param styles: Paragraph styles as a list (tuple) of strings that
-                       have to be fetched. None value implies all paragraphs
-        :type styles: tuple|list of string
+        :param style: Paragraph style that have to be fetched.
+                      None value implies all paragraphs
+        :type style: str
         """
 
         for paragraph in self._document.paragraphs:
-            if styles is not None:
-                for style in styles:
-                    if paragraph.style.name in style:
-                        yield paragraph
+            if style:
+                if paragraph.style.name == style:
+                    yield paragraph
             else:
                 yield paragraph
 
@@ -82,9 +81,9 @@ class DOCXDocument(object):
         for attr, member in type(paragraph.paragraph_format).__dict__.items():
             if isinstance(member, property) and attr not in _except_attributes:
                 fetched_attributes[attr] = self._convert_unit(
-                        paragraph.paragraph_format.__getattribute__(attr) or
-                        self._find_attribute(paragraph.style,
-                                             'paragraph_format', attr), unit)
+                    paragraph.paragraph_format.__getattribute__(attr) or
+                    self._find_attribute(paragraph.style,
+                                         'paragraph_format', attr), unit)
         return fetched_attributes
 
     def _find_attribute(self, p_style, p_element, attr):
@@ -100,35 +99,3 @@ class DOCXDocument(object):
         except AttributeError:
             pass
         return value
-
-
-def extract(document, styles):
-    """Extract data from docx document.
-
-    :param document: Document object loaded from docx
-    :type document: docx.Document
-    :param styles: Styles defined that have to be fetched
-    :type styles: tuple\list
-    """
-
-    docx = DOCXDocument(document)
-    return {
-        "author": docx.author,
-        "created": docx.created.isoformat(),
-        "modified": docx.modified.isoformat(),
-        "last_modified_by": docx.last_modified_by,
-        "sections": [
-            docx.get_section_attributes(section) for section
-            in docx.iter_sections()
-        ],
-        "contents": {
-            "headings": [
-                {
-                    "text": heading.text,
-                    "style": heading.style.name,
-                    "font": docx.get_font_attributes(heading),
-                    "paragraph_format": docx.get_paragraph_attributes(heading)
-                } for heading in docx.iter_paragraphs(styles=styles)
-            ]
-        }
-    }

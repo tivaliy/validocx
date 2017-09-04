@@ -1,0 +1,36 @@
+---
+styles:
+  Heading 1:
+    font:
+    - 14.0
+    - bold
+    - Times New Roman
+    paragraph_format:
+      alignment: 1
+      line_spacing: 1.0
+  Heading 2:
+    font:
+    - 14.0
+    - bold
+    - Times New Roman
+    paragraph_format:
+      alignment: 0
+      line_spacing: 1.0
+  Normal:
+    font:
+    - 14.0
+    - Times New Roman
+    paragraph_format:
+      alignment: 0
+      line_spacing: 1.0
+sections:
+- right_margin: 1.0
+  start_type: 2
+  top_margin: 2.0
+  footer_distance: 1.25
+  header_distance: 1.25
+  left_margin: 2.0
+  bottom_margin: 2.0
+  orientation: 0
+  page_height: 29.7
+  page_width: 21.0
