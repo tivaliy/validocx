@@ -44,8 +44,8 @@ def parse_args(args):
 
 def run(arguments, stdout=sys.stdout):
     document = Document(docx=arguments['file'])
-    schema = utils.read_from_file(arguments['requirements'])
-    validate(document, schema)
+    requirements = utils.read_from_file(arguments['requirements'])
+    validate(document, requirements)
     stdout.write("Validation process completed successfully.\n")
 
 

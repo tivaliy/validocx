@@ -5,6 +5,9 @@ styles:
     - 14.0
     - bold
     - Times New Roman
+    paragraph_format:
+      alignment: 1
+      line_spacing: 1.0
   heading1:
     font:
     - 12.0
