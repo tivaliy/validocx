@@ -2,4 +2,4 @@
 ValiDocX
 ========
 
-MS Word *.docx file content validator
+Docx file validator

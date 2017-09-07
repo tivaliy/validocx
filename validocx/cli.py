@@ -3,6 +3,7 @@
 #
 
 import argparse
+import logging
 import os
 import sys
 
@@ -10,6 +11,12 @@ from docx import Document
 
 from validocx import utils
 from validocx.validator import validate
+
+logging.basicConfig(
+    format='%(asctime)s - %(module)s - %(levelname)s - %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger(__name__)
 
 
 def _get_file_path(file_path):
@@ -42,11 +49,11 @@ def parse_args(args):
     return parsed_args
 
 
-def run(arguments, stdout=sys.stdout):
+def run(arguments):
     document = Document(docx=arguments['file'])
     requirements = utils.read_from_file(arguments['requirements'])
     validate(document, requirements)
-    stdout.write("Validation process completed successfully.\n")
+    logger.info("Validation process completed successfully.\n")
 
 
 def main(args=sys.argv[1:]):

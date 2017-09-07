@@ -5,7 +5,7 @@ styles:
     - 14.0
     - bold
     - Times New Roman
-    paragraph_format:
+    paragraph:
       alignment: 1
       line_spacing: 1.0
   Heading 2:
@@ -13,14 +13,14 @@ styles:
     - 14.0
     - bold
     - Times New Roman
-    paragraph_format:
+    paragraph:
       alignment: 0
       line_spacing: 1.0
   Normal:
     font:
     - 14.0
     - Times New Roman
-    paragraph_format:
+    paragraph:
       alignment: 0
       line_spacing: 1.0
 sections:

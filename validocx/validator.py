@@ -5,68 +5,17 @@
 import jsonschema
 import logging
 import math
+
 from validocx.wrapper import DocumentWrapper
+from validocx.schema import RequirementsSchema
 
 logger = logging.getLogger(__name__)
 
-_REQUIREMENTS_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
-    "type": "object",
-    "properties": {
-        "styles": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "object",
-                "properties": {
-                    "font": {
-                        "type": "array",
-                        "uniqueItems": True
-                    },
-                    "paragraph_format": {
-                        "type": "object",
-                        "properties": {
-                            "first_line_indent": {"type": "number"},
-                            "keep_together": {"type": "number"},
-                            "keep_with_next": {"type": "number"},
-                            "left_indent": {"type": "number"},
-                            "line_spacing": {"type": "number"},
-                            "line_spacing_rule": {"type": "number"},
-                            "page_break_before": {"type": "number"},
-                            "right_indent": {"type": "number"},
-                            "space_after": {"type": "number"},
-                            "space_before": {"type": "number"}
-                        }
-                    }
-                },
-                "required": ["font", "paragraph_format"],
-            }
-        },
-        "sections": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "right_margin": {"type": "number"},
-                    "start_type": {"type": "number"},
-                    "top_margin": {"type": "number"},
-                    "footer_distance": {"type": "number"},
-                    "header_distance": {"type": "number"},
-                    "left_margin": {"type": "number"},
-                    "bottom_margin": {"type": "number"},
-                    "orientation": {"type": "number"},
-                    "page_height": {"type": "number"},
-                    "page_width": {"type": "number"}
-                },
-                "additionalProperties": False
-            }
-        }
-    },
-    "required": ["styles", "sections"]
-}
-
 
 class Validator(object):
-    """Class for validating docx documents."""
+    """Class for validating docx document."""
+
+    schema = RequirementsSchema()
 
     def __init__(self, document):
         """
@@ -74,56 +23,81 @@ class Validator(object):
         """
         self._docx = DocumentWrapper(document)
 
-    def validate_sections(self, section_schema):
-        """Validate sections of documents."""
+    def validate_sections(self, section_requirements):
+        """Validate sections of a document."""
 
-        logger.info("Start validating sections.")
         for item, section in enumerate(self._docx.iter_sections()):
             fetched_attr = self._docx.get_section_attributes(section)
-            for attr, value in section_schema['sections'][item].items():
-                if not math.isclose(fetched_attr[attr], value, rel_tol=1e-03):
+            for attr, value in section_requirements[item].items():
+                if not math.isclose(fetched_attr[attr], value, rel_tol=1e-02):
                     msg = ("Section '{0}': attribute '{1}' with value {2} "
-                           "does not meet required value "
+                           "does not match required value "
                            "{3}".format(item, attr, fetched_attr[attr], value))
                     logger.error(msg)
                     raise ValueError(msg)
 
-    def validate_styles(self, style_schema):
-        """Validate styles of documents."""
+    def validate_styles(self, style_requirements):
+        """Validate styles of a document, i.e. font and paragraph."""
 
-        logger.info("Start validating styles.")
-        available_styles = [style for style in style_schema['styles']]
         for paragraph in self._docx.iter_paragraphs():
-            if paragraph.style.name in available_styles:
+            if paragraph.style.name in style_requirements:
+                self.validate_paragraph(
+                    paragraph,
+                    style_requirements[paragraph.style.name]['paragraph']
+                )
                 self.validate_font(
                     paragraph,
-                    style_schema['styles'][paragraph.style.name]['font']
-                )
+                    style_requirements[paragraph.style.name]['font'])
             else:
-                msg = "Undefined paragraph style: {0}"
+                msg = "Undefined style: '{0}'."
                 logger.warning(msg.format(paragraph.style.name))
 
-    def validate_font(self, paragraph, font_schema):
-        """Validate font for specified paragraph."""
+    def validate_font(self, paragraph, font_requirements):
+        """Validate font for a specified paragraph."""
 
-        fetched_attr = set(self._docx.get_font_attributes(paragraph))
-        req_attr = set(font_schema)
-        if fetched_attr ^ req_attr:
-            msg = (
-                "Font with attributes {0} mismatch required {1} in "
-                "paragraph with style '{2}':\n'{3}'".format(
-                    fetched_attr, req_attr,
+        fetched_attr = self._docx.get_font_attributes(paragraph)
+        if set(fetched_attr) ^ set(font_requirements):
+            msg = ("Font attributes {0} mismatch required {1} in "
+                   "paragraph with style '{2}':\n'{3}'".format(
+                    fetched_attr, font_requirements,
                     paragraph.style.name, paragraph.text))
             logger.error(msg)
             raise ValueError(msg)
 
-    def validate(self, requirements):
+    def validate_paragraph(self, paragraph, paragraph_requirements):
+        """Validate paragraph."""
+
+        fetched_attr = self._docx.get_paragraph_attributes(paragraph)
+        for attr, value in paragraph_requirements.items():
+            if not math.isclose(fetched_attr[attr], value, rel_tol=1e-02):
+                msg = ("Attribute of paragraph '{0}' ({1}) with value {2} "
+                       "does not match required value {3}: \n'{4}'".format(
+                        attr, paragraph.style.name, fetched_attr[attr], value,
+                        paragraph.text))
+                logger.error(msg)
+                raise ValueError(msg)
+
+    def validate(self, document_requirements):
+        """Validate the whole document."""
+
+        self._validate_schema(document_requirements,
+                              self.schema.requirements_schema)
+
+        logger.info("Start validating sections.")
+        self.validate_sections(document_requirements['sections'])
+        logger.info("Start validating styles.")
+        self.validate_styles(document_requirements['styles'])
+
+    @staticmethod
+    def _validate_schema(requirements, schema):
+        """Validate requirements schema."""
+
+        logger.info("Start validating requirements schema.")
         try:
-            jsonschema.validate(requirements, _REQUIREMENTS_SCHEMA)
-        except jsonschema.exceptions.ValidationError as exc:
-            logger.exception(exc)
+            jsonschema.validate(requirements, schema)
+        except jsonschema.exceptions.ValidationError as e:
+            logger.exception(e)
             raise
-        self.validate_sections(requirements)
 
 
 def validate(document, requirements):
