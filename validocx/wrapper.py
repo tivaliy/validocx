@@ -53,14 +53,23 @@ class DocumentWrapper(object):
     def get_font_attributes(self, paragraph, unit='pt'):
         """Get font attributes for specified paragraph."""
 
-        font_size = self._find_attribute(paragraph.style, 'font', 'size')
-        font_family = self._find_attribute(paragraph.style, 'font', 'name')
-        fetched_attributes = [font_size.__getattribute__(unit), font_family]
-        for attribute, member in type(paragraph.style.font).__dict__.items():
-            if isinstance(member, property):
-                if member.__get__(paragraph.style.font) is True:
-                    fetched_attributes.append(attribute)
-        return fetched_attributes
+        runs = []
+        for run in paragraph.runs:
+            size = (run.font.size or
+                    self._find_paragraph_attribute(paragraph.style,
+                                                   'font', 'size'))
+            family = (run.font.name or
+                      self._find_paragraph_attribute(paragraph.style,
+                                                     'font', 'name'))
+            fetched_attributes = [size.__getattribute__(unit), family]
+            for attr, member in type(paragraph.style.font).__dict__.items():
+                if isinstance(member, property):
+                    val = (run.font.__getattribute__(attr) or
+                           paragraph.style.font.__getattribute__(attr))
+                    if val is True:
+                        fetched_attributes.append(attr)
+            runs.append(fetched_attributes)
+        return runs
 
     def get_section_attributes(self, section, unit='cm'):
         """Get attributes for specified section."""
@@ -82,14 +91,17 @@ class DocumentWrapper(object):
             if isinstance(member, property) and attr not in _except_attributes:
                 fetched_attributes[attr] = self._convert_unit(
                     paragraph.paragraph_format.__getattribute__(attr) or
-                    self._find_attribute(paragraph.style,
-                                         'paragraph_format', attr), unit)
+                    self._find_paragraph_attribute(paragraph.style,
+                                                   'paragraph_format',
+                                                   attr),
+                    unit)
         return fetched_attributes
 
-    def _find_attribute(self, p_style, p_element, attr):
+    def _find_paragraph_attribute(self, p_style, p_element, attr):
         value = p_style.__getattribute__(p_element).__getattribute__(attr)
         if value is None and p_style.base_style is not None:
-            return self._find_attribute(p_style.base_style, p_element, attr)
+            return self._find_paragraph_attribute(p_style.base_style,
+                                                  p_element, attr)
         return value
 
     @staticmethod

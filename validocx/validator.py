@@ -53,16 +53,18 @@ class Validator(object):
                 logger.warning(msg.format(paragraph.style.name))
 
     def validate_font(self, paragraph, font_requirements):
-        """Validate font for a specified paragraph."""
+        """Validate font in a specified paragraph."""
 
         fetched_attr = self._docx.get_font_attributes(paragraph)
-        if set(fetched_attr) ^ set(font_requirements):
-            msg = ("Font attributes {0} mismatch required {1} in "
-                   "paragraph with style '{2}':\n'{3}'".format(
-                    fetched_attr, font_requirements,
-                    paragraph.style.name, paragraph.text))
-            logger.error(msg)
-            raise ValueError(msg)
+        for i, attr in enumerate(fetched_attr):
+            if set(attr) ^ set(font_requirements):
+                msg = ("Font attributes ({0}) mismatch required ({1}) in "
+                       "paragraph with style '{2}':\n'{3}'".format(
+                        ', '.join(str(a) for a in attr),
+                        ', '.join(str(r) for r in font_requirements),
+                        paragraph.style.name, paragraph.runs[i].text))
+                logger.error(msg)
+                raise ValueError(msg)
 
     def validate_paragraph(self, paragraph, paragraph_requirements):
         """Validate paragraph."""
