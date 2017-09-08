@@ -7,10 +7,8 @@ import logging
 import os
 import sys
 
-from docx import Document
-
-from validocx import utils
-from validocx.validator import validate
+from . import utils
+from .validator import validate
 
 logging.basicConfig(
     format='%(asctime)s - %(module)s - %(levelname)s - %(message)s',
@@ -50,15 +48,10 @@ def parse_args(args):
 
 
 def run(arguments):
-    document = Document(docx=arguments['file'])
     requirements = utils.read_from_file(arguments['requirements'])
-    validate(document, requirements)
+    validate(arguments['file'], requirements)
     logger.info("Validation process completed successfully.\n")
 
 
 def main(args=sys.argv[1:]):
     sys.exit(run(arguments=parse_args(args=args)))
-
-
-if __name__ == '__main__':
-    main()

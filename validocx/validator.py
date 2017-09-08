@@ -2,12 +2,16 @@
 #    Copyright 2017 Vitalii Kulanov
 #
 
+__all__ = ['Validator', 'validate']
+
 import jsonschema
 import logging
 import math
 
-from validocx.wrapper import DocumentWrapper
-from validocx.schema import RequirementsSchema
+from docx import Document
+
+from .wrapper import DocumentWrapper
+from .schema import RequirementsSchema
 
 logger = logging.getLogger(__name__)
 
@@ -103,5 +107,11 @@ class Validator(object):
 
 
 def validate(document, requirements):
-    validator = Validator(document)
+    """Validates docx document.
+
+    :param document: path to docx file to be validated as a string
+    :param requirements: document requirements as a dict (see examples)
+    """
+    docx_document = Document(document)
+    validator = Validator(docx_document)
     validator.validate(requirements)

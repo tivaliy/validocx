@@ -2,6 +2,8 @@
 #    Copyright 2017 Vitalii Kulanov
 #
 
+__all__ = ['DocumentWrapper']
+
 
 class DocumentWrapper(object):
     """Wrapper class for retrieving docx document attributes."""
