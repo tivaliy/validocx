@@ -34,7 +34,7 @@ def create_parser():
     )
     parser.add_argument(
         '-r', '--requirements',
-        required='True',
+        required=True,
         type=_get_file_path,
         help='File with the requirements. In YAML or JSON format.'
     )
@@ -50,7 +50,6 @@ def parse_args(args):
 def run(arguments):
     requirements = utils.read_from_file(arguments['requirements'])
     validate(arguments['file'], requirements)
-    logger.info("Validation process completed successfully.\n")
 
 
 def main(args=sys.argv[1:]):

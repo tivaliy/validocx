@@ -93,6 +93,7 @@ class Validator(object):
         self.validate_sections(document_requirements['sections'])
         logger.info("Start validating styles.")
         self.validate_styles(document_requirements['styles'])
+        logger.info("Validation process completed.\n")
 
     @staticmethod
     def _validate_schema(requirements, schema):

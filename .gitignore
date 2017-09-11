@@ -2,4 +2,7 @@
 *.pyc
 .eggs
 *.egg-info
-.tox
+
+# Unit test reports
+.tox/
+.cache
