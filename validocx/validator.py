@@ -75,13 +75,18 @@ class Validator(object):
 
         fetched_attr = self._docx.get_paragraph_attributes(paragraph)
         for attr, value in paragraph_requirements.items():
-            if not math.isclose(fetched_attr[attr], value, rel_tol=1e-02):
-                msg = ("Attribute of paragraph '{0}' ({1}) with value {2} "
-                       "does not match required value {3}: \n'{4}'".format(
-                        attr, paragraph.style.name, fetched_attr[attr], value,
-                        paragraph.text))
-                logger.error(msg)
-                raise ValueError(msg)
+            if fetched_attr[attr]:
+                if not math.isclose(fetched_attr[attr], value, rel_tol=1e-02):
+                    msg = ("The attribute of paragraph '{0}' ({1}) with value "
+                           "{2} does not match required value {3}: "
+                           "\n'{4}'".format(attr, paragraph.style.name,
+                                            fetched_attr[attr], value,
+                                            paragraph.text))
+                    logger.error(msg)
+            else:
+                logger.error("The attribute of paragraph '{0}' is not "
+                             "defined. The required value is {1}: "
+                             "\n'{2}'".format(attr, value, paragraph.text))
 
     def validate(self, document_requirements):
         """Validate the whole document."""
