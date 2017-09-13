@@ -74,7 +74,7 @@ class Validator(object):
 
         fetched_attr = self._docx.get_paragraph_attributes(paragraph)
         for attr, value in paragraph_requirements.items():
-            if fetched_attr[attr]:
+            if fetched_attr[attr] is not None:
                 if not math.isclose(fetched_attr[attr], value, rel_tol=1e-02):
                     msg = ("The attribute of paragraph '{0}' ({1}) with value "
                            "{2} does not match required value {3}: "
