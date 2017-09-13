@@ -63,7 +63,7 @@ class DocumentWrapper(object):
             family = (run.font.name or
                       self._find_paragraph_attribute(paragraph.style,
                                                      'font', 'name'))
-            fetched_attributes = [size.__getattribute__(unit), family]
+            fetched_attributes = [self._convert_unit(size, unit), family]
             for attr, member in type(paragraph.style.font).__dict__.items():
                 if isinstance(member, property):
                     val = (run.font.__getattribute__(attr) or

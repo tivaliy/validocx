@@ -68,7 +68,6 @@ class Validator(object):
                         ', '.join(str(r) for r in font_requirements),
                         paragraph.style.name, paragraph.runs[i].text))
                 logger.error(msg)
-                raise ValueError(msg)
 
     def validate_paragraph(self, paragraph, paragraph_requirements):
         """Validate paragraph."""
