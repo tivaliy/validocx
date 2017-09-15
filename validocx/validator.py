@@ -31,15 +31,19 @@ class Validator(object):
         """Validate sections of a document."""
 
         for i, section in enumerate(self._docx.iter_sections()):
-            unit = section_requirements[i]['unit']
-            fetched_attr = self._docx.get_section_attributes(section,
-                                                             unit=unit)
-            for attr, value in section_requirements[i]['attributes'].items():
-                if not math.isclose(fetched_attr[attr], value, rel_tol=1e-02):
-                    msg = ("Section '{0}': attribute '{1}' with value {2} "
-                           "does not match required value "
-                           "{3}".format(i, attr, fetched_attr[attr], value))
-                    logger.error(msg)
+            if i < len(section_requirements):
+                unit = section_requirements[i]['unit']
+                fetched_attr = self._docx.get_section_attributes(section,
+                                                                 unit=unit)
+                for attr, v in section_requirements[i]['attributes'].items():
+                    if not math.isclose(fetched_attr[attr], v, rel_tol=1e-02):
+                        msg = ("'Section {0}': attribute '{1}' with value {2} "
+                               "does not match required value "
+                               "{3}".format(i, attr, fetched_attr[attr], v))
+                        logger.error(msg)
+            else:
+                logger.warning("The requirements for 'Section {0}' "
+                               "are not specified.".format(i))
 
     def validate_styles(self, style_requirements):
         """Validate styles of a document, i.e. font and paragraph."""
