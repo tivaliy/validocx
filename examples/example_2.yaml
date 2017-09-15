@@ -2,37 +2,51 @@
 styles:
   papertitle:
     font:
-    - 14.0
-    - bold
-    - Times New Roman
+      unit: pt
+      attributes:
+      - 14.0
+      - bold
+      - Times New Roman
     paragraph:
-      alignment: 1
-      line_spacing: 0.635
-      first_line_indent: 0
+      unit: cm
+      attributes:
+        alignment: 1
+        line_spacing: 0.635
+        first_line_indent: 0
   heading1:
     font:
-    - 12.0
-    - cs_bold
-    - Times New Roman
+      unit: pt
+      attributes:
+      - 12.0
+      - cs_bold
+      - Times New Roman
     paragraph:
-      alignment: 0
-      line_spacing: 0.529
+      unit: cm
+      attributes:
+        alignment: 0
+        line_spacing: 0.529
   Normal:
     font:
-    - 10.0
-    - Times New Roman
+      unit: pt
+      attributes:
+      - 10.0
+      - Times New Roman
     paragraph:
-      alignment: 3
-      line_spacing: 1
-      first_line_indent: 0.4
+      unit: cm
+      attributes:
+        alignment: 3
+        line_spacing: 1
+        first_line_indent: 0.4
 sections:
-- right_margin: 4.4
-  start_type: 2
-  top_margin: 5.2
-  footer_distance: 4.1
-  header_distance: 0.0
-  left_margin: 4.4
-  bottom_margin: 5.2
-  orientation: 0
-  page_height: 29.7
-  page_width: 21.0
+- unit: cm
+  attributes:
+    right_margin: 4.4
+    start_type: 2
+    top_margin: 5.2
+    footer_distance: 4.1
+    header_distance: 0.0
+    left_margin: 4.4
+    bottom_margin: 5.2
+    orientation: 0
+    page_height: 29.7
+    page_width: 21.0

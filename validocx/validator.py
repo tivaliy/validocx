@@ -30,15 +30,16 @@ class Validator(object):
     def validate_sections(self, section_requirements):
         """Validate sections of a document."""
 
-        for item, section in enumerate(self._docx.iter_sections()):
-            fetched_attr = self._docx.get_section_attributes(section)
-            for attr, value in section_requirements[item].items():
+        for i, section in enumerate(self._docx.iter_sections()):
+            unit = section_requirements[i]['unit']
+            fetched_attr = self._docx.get_section_attributes(section,
+                                                             unit=unit)
+            for attr, value in section_requirements[i]['attributes'].items():
                 if not math.isclose(fetched_attr[attr], value, rel_tol=1e-02):
                     msg = ("Section '{0}': attribute '{1}' with value {2} "
                            "does not match required value "
-                           "{3}".format(item, attr, fetched_attr[attr], value))
+                           "{3}".format(i, attr, fetched_attr[attr], value))
                     logger.error(msg)
-                    raise ValueError(msg)
 
     def validate_styles(self, style_requirements):
         """Validate styles of a document, i.e. font and paragraph."""
@@ -59,21 +60,25 @@ class Validator(object):
     def validate_font(self, paragraph, font_requirements):
         """Validate font in a specified paragraph."""
 
-        fetched_attr = self._docx.get_font_attributes(paragraph)
+        unit = font_requirements['unit']
+        requirements = font_requirements['attributes']
+        fetched_attr = self._docx.get_font_attributes(paragraph, unit=unit)
         for i, attr in enumerate(fetched_attr):
-            if set(attr) ^ set(font_requirements):
+            if set(attr) ^ set(requirements):
                 msg = ("Font attributes ({0}) mismatch required ({1}) in "
                        "paragraph with style '{2}':\n'{3}'".format(
                         ', '.join(str(a) for a in attr),
-                        ', '.join(str(r) for r in font_requirements),
+                        ', '.join(str(r) for r in requirements),
                         paragraph.style.name, paragraph.runs[i].text))
                 logger.error(msg)
 
     def validate_paragraph(self, paragraph, paragraph_requirements):
         """Validate paragraph."""
 
-        fetched_attr = self._docx.get_paragraph_attributes(paragraph)
-        for attr, value in paragraph_requirements.items():
+        unit = paragraph_requirements['unit']
+        fetched_attr = self._docx.get_paragraph_attributes(paragraph,
+                                                           unit=unit)
+        for attr, value in paragraph_requirements['attributes'].items():
             if fetched_attr[attr] is not None:
                 if not math.isclose(fetched_attr[attr], value, rel_tol=1e-02):
                     msg = ("The attribute of paragraph '{0}' ({1}) with value "
@@ -92,7 +97,6 @@ class Validator(object):
 
         self._validate_schema(document_requirements,
                               self.schema.requirements_schema)
-
         logger.info("Start validating sections.")
         self.validate_sections(document_requirements['sections'])
         logger.info("Start validating styles.")
