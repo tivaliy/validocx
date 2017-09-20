@@ -16,14 +16,18 @@ FILE_LOG_FORMAT = ('%(asctime)s.%(msecs)03d %(levelname)s '
                    '(%(module)s) %(message)s')
 
 
-def configure_logging(level, file_path=None):
-    logging.basicConfig(level=level, format=CONSOLE_LOG_FORMAT)
-    if file_path:
-        fh = logging.FileHandler(filename=file_path)
-        fh.setLevel(level=level)
-        formatter = logging.Formatter(fmt=FILE_LOG_FORMAT, datefmt=DATE_FORMAT)
-        fh.setFormatter(formatter)
-        logging.getLogger().addHandler(fh)
+class MessageCounterHandler(logging.Handler):
+    msg_level_count = None
+
+    def __init__(self, *args, **kwargs):
+        super(MessageCounterHandler, self).__init__(*args, **kwargs)
+        self.msg_level_count = {}
+
+    def emit(self, record):
+        level = record.levelname
+        if level not in self.msg_level_count:
+            self.msg_level_count[level] = 0
+        self.msg_level_count[level] += 1
 
 
 def _get_file_path(file_path):
@@ -80,10 +84,22 @@ def run(arguments):
                'verbose': logging.DEBUG}
     level = log_map[arguments['level']] if arguments['level'] else logging.INFO
     log_file = arguments['log_file'] if arguments['log_file'] else None
-    configure_logging(level=level, file_path=log_file)
+    logging.basicConfig(level=level, format=CONSOLE_LOG_FORMAT)
+    logger = logging.getLogger()
+    mch = MessageCounterHandler()
+    logger.addHandler(mch)
+    if log_file:
+        fh = logging.FileHandler(filename=log_file)
+        fh.setLevel(level=level)
+        formatter = logging.Formatter(fmt=FILE_LOG_FORMAT, datefmt=DATE_FORMAT)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
 
     requirements = utils.read_from_file(arguments['requirements'])
     validate(arguments['file'], requirements)
+    logger.info("Summary results: Errors - {0}, "
+                "Warnings - {1}".format(mch.msg_level_count['ERROR'],
+                                        mch.msg_level_count['WARNING']))
 
 
 def main(args=sys.argv[1:]):
