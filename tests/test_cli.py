@@ -18,17 +18,16 @@ def exec_command(command=''):
 
 
 def test_cli_with_empty_args_fail(capsys):
-    cmd = ''
     with pytest.raises(SystemExit):
-        exec_command(cmd)
+        exec_command()
     out, err = capsys.readouterr()
     assert ("error: the following arguments are required: "
-            "-f/--file, -r/--requirements" in err)
+            "docx-file, -r/--requirements" in err)
 
 
 @pytest.mark.parametrize('cmd, required_argument', [
-    ('--requirements /tmp/fake_requirements.yaml', '-f/--file'),
-    ('--file /tmp/fake.docx', '-r/--requirements')
+    ('--requirements /tmp/fake_requirements.yaml', 'docx-file'),
+    ('/tmp/fake.docx', '-r/--requirements')
 ])
 def test_cli_wo_file_argument_fail(cmd, required_argument, mocker, capsys):
     mocker.patch('validocx.cli.os.path.lexists', return_value=True)
@@ -44,7 +43,7 @@ def test_cli_wo_file_argument_fail(cmd, required_argument, mocker, capsys):
     ([False, True], 'fake.docx')
 ])
 def test_cli_file_missing_fail(side_effect, file_name, mocker, capsys):
-    cmd = '--file fake.docx --requirements requirements.yaml'
+    cmd = 'fake.docx --requirements requirements.yaml'
     mocker.patch('validocx.cli.os.path.lexists', side_effect=side_effect)
     with pytest.raises(SystemExit):
         exec_command(cmd)
@@ -53,7 +52,7 @@ def test_cli_file_missing_fail(side_effect, file_name, mocker, capsys):
 
 
 def test_cli_verbosity_level_w_mutually_exclusive_params_fail(mocker, capsys):
-    cmd = '--file fake.docx --requirements requirements.yaml -q -v'
+    cmd = 'fake.docx --requirements requirements.yaml -q -v'
     mocker.patch('validocx.cli.os.path.lexists', return_value=True)
     with pytest.raises(SystemExit):
         exec_command(cmd)

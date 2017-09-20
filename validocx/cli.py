@@ -40,8 +40,7 @@ def _get_file_path(file_path):
 def create_parser():
     parser = argparse.ArgumentParser(description='docx-file validation CLI.')
     parser.add_argument(
-        '-f', '--file',
-        required=True,
+        'docx-file',
         type=_get_file_path,
         help='Docx file to be validated.'
     )
@@ -96,7 +95,7 @@ def run(arguments):
         logger.addHandler(fh)
 
     requirements = utils.read_from_file(arguments['requirements'])
-    validate(arguments['file'], requirements)
+    validate(arguments['docx-file'], requirements)
     logger.info("Summary results: Errors - {0}, "
                 "Warnings - {1}".format(mch.msg_level_count['ERROR'],
                                         mch.msg_level_count['WARNING']))
