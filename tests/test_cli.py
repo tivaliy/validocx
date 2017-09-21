@@ -5,6 +5,7 @@
 import shlex
 
 import pytest
+import yaml
 
 from validocx import cli
 
@@ -59,3 +60,40 @@ def test_cli_verbosity_level_w_mutually_exclusive_params_fail(mocker, capsys):
     out, err = capsys.readouterr()
     assert ("error: argument -v/--verbose: "
             "not allowed with argument -q/--quiet" in err)
+
+
+@pytest.fixture
+def prepare_env(mocker):
+    mocker.patch('validocx.cli.os.path.lexists', return_value=True)
+    mocker.patch('validocx.cli.MessageCounterHandler.msg_level_count',
+                 new_callable=mocker.PropertyMock,
+                 return_value={'ERROR': 5, 'WARNING': 10})
+
+
+def test_cli_validate(prepare_env, mocker):
+    docx_file = '/tmp/fake.docx'
+    requirements = {'fake': {'foo': ['bar']}}
+    req_file = '/tmp/requirements.yaml'
+    cmd = '{0} --requirements {1}'.format(docx_file, req_file)
+    m_open = mocker.mock_open(read_data=yaml.dump(requirements))
+    mocker.patch('validocx.utils.open', m_open, create=True)
+    m_validate = mocker.patch('validocx.cli.validate')
+    exec_command(cmd)
+    m_open.assert_called_once_with(req_file, 'r')
+    m_validate.assert_called_once_with(docx_file, requirements)
+
+
+def test_cli_validate_w_log_file(prepare_env, tmpdir, mocker):
+    log_file = tmpdir.join('fake.log')
+    docx_file = '/tmp/fake.docx'
+    requirements = {'fake': {'foo': ['bar']}}
+    req_file = '/tmp/requirements.yaml'
+    cmd = '{0} --requirements {1} --log-file {2}'.format(
+        docx_file, req_file, log_file)
+    m_open = mocker.mock_open(read_data=yaml.dump(requirements))
+    mocker.patch('validocx.utils.open', m_open, create=True)
+    m_validate = mocker.patch('validocx.cli.validate')
+    exec_command(cmd)
+    m_open.assert_called_once_with(req_file, 'r')
+    m_validate.assert_called_once_with(docx_file, requirements)
+    assert "Summary results: Errors - 5, Warnings - 10" in log_file.read()
