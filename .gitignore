@@ -6,3 +6,4 @@
 # Unit test reports
 .tox/
 .cache
+.coverage

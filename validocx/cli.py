@@ -101,5 +101,5 @@ def run(arguments):
                                         mch.msg_level_count['WARNING']))
 
 
-def main(args=sys.argv[1:]):
+def main(args=sys.argv[1:]):  # pragma: no cover
     sys.exit(run(arguments=parse_args(args=args)))
