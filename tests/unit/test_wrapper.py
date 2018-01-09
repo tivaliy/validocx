@@ -63,14 +63,15 @@ def test_fetch_last_modifier_data(docx_wrapper):
     assert docx_wrapper.last_modified_by == ''
 
 
-@pytest.mark.parametrize('paragraph_styles, expected', [
-    ('Title', ['Fake Title']),
-    (None, ['Fake Title', 'Fake Header 1',
-            'Fake Header 2', 'Some bold and some italic.'])
+@pytest.mark.parametrize('paragraph_styles, expected_length', [
+    (['Title'], 1),
+    (['Heading 1', 'Heading 2'], 2),
+    (['Non-existing-style'], 0),
+    (None, 4)
 ])
-def test_fetch_paragraph_data(docx_wrapper, paragraph_styles, expected):
-    for item in docx_wrapper.iter_paragraphs(paragraph_styles):
-        assert item.text in expected
+def test_fetch_paragraph_data(docx_wrapper, paragraph_styles, expected_length):
+    paragraphs = docx_wrapper.iter_paragraphs(paragraph_styles)
+    assert len(list(paragraphs)) == expected_length
 
 
 def test_fetch_section_data(docx_wrapper):

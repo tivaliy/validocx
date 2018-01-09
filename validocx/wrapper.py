@@ -31,17 +31,17 @@ class DocumentWrapper(object):
     def last_modified_by(self):
         return self._last_modified_by
 
-    def iter_paragraphs(self, style=None):
-        """Iterate over paragraphs of document.
+    def iter_paragraphs(self, styles=None):
+        """Get paragraphs of specific styles of a document.
 
-        :param style: Paragraph style that have to be fetched.
-                      None value implies all paragraphs
-        :type style: str
+        :param styles: Paragraph styles (as a list of strings) that have
+                       to be fetched. None value implies all paragraphs
+        :type styles: list
         """
 
         for paragraph in self._document.paragraphs:
-            if style:
-                if paragraph.style.name == style:
+            if styles:
+                if paragraph.style.name in styles:
                     yield paragraph
             else:
                 yield paragraph
