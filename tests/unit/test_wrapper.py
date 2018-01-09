@@ -6,6 +6,8 @@ import pytest
 
 from docx import Document
 from docx.shared import Pt
+from docx.shared import Cm
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 from validocx import wrapper
 
@@ -21,11 +23,21 @@ def document():
     font = style.font
     font.name = 'Calibri'
     font.size = Pt(12)
-    # Add some text in 'Normal' style
+    # Add some text (paragraph) of 'Normal' style
     p = doc.add_paragraph('Some ')
     p.add_run('bold').bold = True
     p.add_run(' and some ')
     p.add_run('italic.').italic = True
+    # Set custom paragraph attributes
+    paragraph_format = p.paragraph_format
+    paragraph_format.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    paragraph_format.left_indent = Cm(0.5)
+    paragraph_format.right_indent = Cm(0.5)
+    paragraph_format.space_before = Cm(1)
+    paragraph_format.space_after = Cm(1)
+    paragraph_format.first_line_indent = Cm(1.25)
+    paragraph_format.line_spacing = Cm(1.0)
+    paragraph_format.keep_with_next = True
     return doc
 
 
@@ -74,3 +86,31 @@ def test_fetch_font_attributes(docx_wrapper, p_style, expected):
     p = list(docx_wrapper.iter_paragraphs(p_style))[0]
     runs = docx_wrapper.get_font_attributes(p)
     assert runs == expected
+
+
+def test_fetch_section_attributes(docx_wrapper):
+    section = list(docx_wrapper.iter_sections())[0]
+    section_attr = docx_wrapper.get_section_attributes(section)
+    assert section_attr == {'page_height': 27.94, 'left_margin': 3.175,
+                            'page_width': 21.59, 'gutter': 0.0,
+                            'bottom_margin': 2.54, 'orientation': 0,
+                            'header_distance': 1.27, 'footer_distance': 1.27,
+                            'top_margin': 2.54, 'right_margin': 3.175,
+                            'start_type': 2}
+
+
+def test_fetch_paragraph_attributes(docx_wrapper):
+    p = list(docx_wrapper.iter_paragraphs('Normal'))[0]
+    p_attr = docx_wrapper.get_paragraph_attributes(p)
+    assert p_attr == {'page_break_before': None,
+                      'keep_together': None,
+                      'line_spacing': 1.000125,
+                      'space_after': 1.000125,
+                      'space_before': 1.000125,
+                      'keep_with_next': True,
+                      'alignment': 3,
+                      'right_indent': 0.49918055555555557,
+                      'line_spacing_rule': 4,
+                      'left_indent': 0.49918055555555557,
+                      'first_line_indent': 1.2505972222222221,
+                      'widow_control': None}
