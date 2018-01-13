@@ -84,21 +84,21 @@ def run(arguments):
     level = log_map[arguments['level']] if arguments['level'] else logging.INFO
     log_file = arguments['log_file'] if arguments['log_file'] else None
     logging.basicConfig(level=level, format=CONSOLE_LOG_FORMAT)
-    logger = logging.getLogger(__name__)
+    root_logger = logging.getLogger()
     mch = MessageCounterHandler()
-    logger.addHandler(mch)
+    root_logger.addHandler(mch)
     if log_file:
         fh = logging.FileHandler(filename=log_file)
         fh.setLevel(level=level)
         formatter = logging.Formatter(fmt=FILE_LOG_FORMAT, datefmt=DATE_FORMAT)
         fh.setFormatter(formatter)
-        logger.addHandler(fh)
+        root_logger.addHandler(fh)
 
     requirements = utils.read_from_file(arguments['requirements'])
     validate(arguments['docx-file'], requirements)
-    logger.info("Summary results: Errors - {0}, "
-                "Warnings - {1}".format(mch.msg_level_count['ERROR'],
-                                        mch.msg_level_count['WARNING']))
+    root_logger.info("Summary results: Errors - {0}, "
+                     "Warnings - {1}".format(mch.msg_level_count['ERROR'],
+                                             mch.msg_level_count['WARNING']))
 
 
 def main(args=sys.argv[1:]):  # pragma: no cover
