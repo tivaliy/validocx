@@ -84,7 +84,7 @@ def run(arguments):
     level = log_map[arguments['level']] if arguments['level'] else logging.INFO
     log_file = arguments['log_file'] if arguments['log_file'] else None
     logging.basicConfig(level=level, format=CONSOLE_LOG_FORMAT)
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
     mch = MessageCounterHandler()
     logger.addHandler(mch)
     if log_file:

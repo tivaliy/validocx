@@ -62,15 +62,12 @@ def test_cli_verbosity_level_w_mutually_exclusive_params_fail(mocker, capsys):
             "not allowed with argument -q/--quiet" in err)
 
 
-@pytest.fixture
-def prepare_env(mocker):
+def test_cli_validate(mocker):
     mocker.patch('validocx.cli.os.path.lexists', return_value=True)
-    mocker.patch('validocx.cli.MessageCounterHandler.msg_level_count',
-                 new_callable=mocker.PropertyMock,
-                 return_value={'ERROR': 5, 'WARNING': 10})
-
-
-def test_cli_validate(prepare_env, mocker):
+    m_msg_lvl_cnt = mocker.patch.object(cli.MessageCounterHandler,
+                                        'msg_level_count',
+                                        new_callable=mocker.PropertyMock)
+    m_msg_lvl_cnt.return_value = {'ERROR': 5, 'WARNING': 10}
     docx_file = '/tmp/fake.docx'
     requirements = {'fake': {'foo': ['bar']}}
     req_file = '/tmp/requirements.yaml'
@@ -83,7 +80,12 @@ def test_cli_validate(prepare_env, mocker):
     m_validate.assert_called_once_with(docx_file, requirements)
 
 
-def test_cli_validate_w_log_file(prepare_env, tmpdir, mocker):
+def test_cli_validate_w_log_file(tmpdir, mocker):
+    mocker.patch('validocx.cli.os.path.lexists', return_value=True)
+    m_msg_lvl_cnt = mocker.patch.object(cli.MessageCounterHandler,
+                                        'msg_level_count',
+                                        new_callable=mocker.PropertyMock)
+    m_msg_lvl_cnt.return_value = {'ERROR': 15, 'WARNING': 2}
     log_file = tmpdir.join('fake.log')
     docx_file = '/tmp/fake.docx'
     requirements = {'fake': {'foo': ['bar']}}
@@ -96,4 +98,4 @@ def test_cli_validate_w_log_file(prepare_env, tmpdir, mocker):
     exec_command(cmd)
     m_open.assert_called_once_with(req_file, 'r')
     m_validate.assert_called_once_with(docx_file, requirements)
-    assert "Summary results: Errors - 5, Warnings - 10" in log_file.read()
+    assert "Summary results: Errors - 15, Warnings - 2" in log_file.read()

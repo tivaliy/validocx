@@ -119,12 +119,12 @@ class Validator(object):
             raise
 
 
-def validate(docx_path, requirements):
+def validate(docx, requirements):
     """Validates docx document.
 
-    :param docx_path: path to docx file to be validated
+    :param docx: path to docx file (as a string) or a file-like object
     :param requirements: document requirements as a dict (see examples)
     """
-    document = Document(docx_path)
+    document = Document(docx)
     validator = Validator(document)
     validator.validate(requirements)
