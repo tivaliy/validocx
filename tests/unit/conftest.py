@@ -36,4 +36,6 @@ def document():
     paragraph_format.first_line_indent = Cm(1.25)
     paragraph_format.line_spacing = Cm(1.0)
     paragraph_format.keep_with_next = True
+    # Add new section
+    doc.add_section()
     return doc

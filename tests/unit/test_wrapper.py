@@ -32,7 +32,7 @@ def test_fetch_last_modifier_data(docx_wrapper):
     (['Title'], 1),
     (['Heading 1', 'Heading 2'], 2),
     (['Non-existing-style'], 0),
-    (None, 4)
+    (None, 5)
 ])
 def test_fetch_paragraph_data(docx_wrapper, paragraph_styles, expected_length):
     paragraphs = docx_wrapper.iter_paragraphs(paragraph_styles)
@@ -40,7 +40,7 @@ def test_fetch_paragraph_data(docx_wrapper, paragraph_styles, expected_length):
 
 
 def test_fetch_section_data(docx_wrapper):
-    assert len(list(docx_wrapper.iter_sections())) == 1
+    assert len(list(docx_wrapper.iter_sections())) == 2
 
 
 @pytest.mark.parametrize('p_style, expected', [
